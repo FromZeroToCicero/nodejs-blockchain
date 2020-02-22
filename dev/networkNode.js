@@ -155,6 +155,61 @@ app.post("/transaction/broadcast", (req,res) => {
     });
 });
 
+app.get("/consensus", (req, res) => {
+    const reqPromises = [];
+    bitcoin.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + "/blockchain",
+            method: "GET",
+            json: true
+        };
+        reqPromises.push(rp(requestOptions));
+    });
+    Promise.all(reqPromises).then(blockchains => {
+        const currentChainLength = bitcoin.chain.length;
+        let maxChainLength = currentChainLength;
+        let newLongestChain = null;
+        let newPendingTransactions = null;
+        blockchains.forEach(blockchain => {
+            if (blockchain.chain.length > maxChainLength) {
+                maxChainLength = blockchain.chain.length;
+                newLongestChain = blockchain.chain;
+                newPendingTransactions = blockchain.pendingTransactions;
+            }
+        });
+
+        if (!newLongestChain || (newLongestChain && !bitcoin.chainIsValid(newLongestChain))) {
+            res.json({ note: "Current chain has not been replaced.", chain: bitcoin.chain });
+        } else {
+            bitcoin.chain = newLongestChain;
+            bitcoin.pendingTransactions = newPendingTransactions;
+            res.json({ note: "This chain has been replaced.", chain: bitcoin.chain });
+        }
+    });
+});
+
+app.get("/block/:blockHash", (req, res) => { // GET block data
+    const blockHash = req.params.blockHash;
+    const correctBlock = bitcoin.getBlock(blockHash);
+    res.json({ block: correctBlock })
+});
+
+app.get("/transaction/:transactionId", (req, res) => {  // GET specific transaction
+    const transactionId = req.params.transactionId;
+    const { correctTransaction, correctBlock } = bitcoin.getTransaction(transactionId);
+    res.json({ transaction: correctTransaction, block: correctBlock });
+});
+
+app.get("/address/:address", (req, res) => { // GET list of transactions from/to the given address + current balance
+    const address = req.params.address;
+    const { addressTransactions, balance } = bitcoin.getAddressData(address);
+    res.json({ addressTransactions, balance });
+});
+
+app.get("/block-explorer", (req, res) => {
+    res.sendFile('./block-explorer/index.html', { root: __dirname });
+});
+
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
