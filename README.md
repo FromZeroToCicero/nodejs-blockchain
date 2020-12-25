@@ -22,6 +22,11 @@ In this project, I have created a blockchain-like data structure with Express, N
 
 5. If you want to test things out, I have created a Postman collection with all the endpoints you could interact with, in order to fully experience what this blockchain can offer - [Postman collection](https://www.getpostman.com/collections/6f23bf72550eb5951796)
 
+6. To run the unit tests that have been written with Chai & Mocha for the blockchain, run the following command:
+
+    ```
+    npm run test
+    ```
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details.
