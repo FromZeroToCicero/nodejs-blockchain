@@ -1,25 +1,34 @@
 {
-  "name": "udemy-blockchain",
+  "name": "nodejs-blockchain",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A blockchain-like data structure project, created with Express, NodeJS and Javascript. This project mimics how the Bitcoin blockchain works, how transactions are created, how blocks are mined and added to the chain and how the rewarding system for the mining node works.",
+  "main": "dev/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "node_1": "nodemon --watch dev -e js dev/networkNode.js 3001 http://localhost:3001",
-    "node_2": "nodemon --watch dev -e js dev/networkNode.js 3002 http://localhost:3002",
-    "node_3": "nodemon --watch dev -e js dev/networkNode.js 3003 http://localhost:3003",
-    "node_4": "nodemon --watch dev -e js dev/networkNode.js 3004 http://localhost:3004",
-    "node_5": "nodemon --watch dev -e js dev/networkNode.js 3005 http://localhost:3005"
+    "node_1": "nodemon --watch dev -e js dev/server.js 3001 http://localhost:3001",
+    "node_2": "nodemon --watch dev -e js dev/server.js 3002 http://localhost:3002",
+    "node_3": "nodemon --watch dev -e js dev/server.js 3003 http://localhost:3003",
+    "node_4": "nodemon --watch dev -e js dev/server.js 3004 http://localhost:3004",
+    "node_5": "nodemon --watch dev -e js dev/server.js 3005 http://localhost:3005",
+    "test": "mocha"
   },
-  "author": "Mircea Sima",
+  "author": "FromZeroToCicero",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
-    "nodemon": "^2.0.2",
+    "helmet": "^4.2.0",
+    "nodemon": "^2.0.6",
     "request": "^2.88.2",
-    "request-promise": "^4.2.5",
+    "request-promise": "^4.2.6",
     "sha256": "^0.2.0",
-    "uuid": "^3.4.0"
+    "uuid": "^3.4.0",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "chai-spies": "^1.0.0",
+    "mocha": "^7.1.0"
   }
 }
