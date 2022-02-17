@@ -1,5 +1,6 @@
 const sha256 = require("sha256");
-const uuid = require("uuid/v1");
+
+const utils = require("./utils");
 
 const currentNodeUrl = process.argv[3] || "";
 
@@ -11,7 +12,7 @@ class Blockchain {
     this.currentNodeAddress = nodeAddress;
     this.networkNodes = []; // we will add all the urls of each node that will be inside the network
 
-    this.createNewBlock(100, "0", "0"); // arbitrary values for the genesis block
+    this.createNewBlock(0, "0", "0"); // arbitrary values for the genesis block
 
     // the pending transactions are saved in the blockchain when a new block is mined (which is when a new block is created)
   }
@@ -38,13 +39,13 @@ class Blockchain {
     return this.chain[this.chain.length - 1];
   };
 
-  createNewTransaction = (amount, sender, recipient) => {
+  createNewTransaction = (sender, recipient, amount) => {
     // function that creates a new transaction with the amount of bitcoins sent, the sender and recipient adresses
     const newTransaction = {
-      transactionId: uuid().split("-").join(""),
-      amount,
+      transactionId: utils.generateUuid(),
       sender,
       recipient,
+      amount,
     };
     return newTransaction;
   };
@@ -52,12 +53,13 @@ class Blockchain {
   addTransactionToPendingTransactions = (transaction) => {
     // store the new transaction in the list of pending transactions that are to be added in a new block
     this.pendingTransactions.push(transaction);
-    return this.getLastBlock()["index"] + 1; // returns the block number where this transaction will be stored
+    return this.chain.indexOf(this.getLastBlock()) + 1; // returns the block number where this transaction will be stored
   };
 
   hashBlock = (previousBlockHash, currentBlockData, nonce) => {
     // used to hash the data that we pass in for a block - returns the resulting sha256 hash string
-    const dataAsString = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
+    const dataAsString =
+      previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
     const hash = sha256(dataAsString);
     return hash;
   };
@@ -83,19 +85,31 @@ class Blockchain {
     for (let i = 1; i < blockchain.length; i++) {
       const currentBlock = blockchain[i];
       const previousBlock = blockchain[i - 1];
-      const blockHash = this.hashBlock(previousBlock.hash, { transactions: currentBlock.transactions, index: currentBlock.index }, currentBlock.nonce);
+      const blockHash = this.hashBlock(
+        previousBlock.hash,
+        { transactions: currentBlock.transactions, index: currentBlock.index },
+        currentBlock.nonce
+      );
       // if the hash of the previous block is different than the previousBlockHash of the current block or if the current hash doesn't start with 4 zeros, it means that the chain is not valid
-      if (currentBlock.previousBlockHash !== previousBlock.hash || blockHash.substring(0, 4) !== "0000") {
+      if (
+        currentBlock.previousBlockHash !== previousBlock.hash ||
+        blockHash.substring(0, 4) !== "0000"
+      ) {
         validChain = false;
       }
     }
     // verify the genesis block values
     const genesisBlock = blockchain[0];
-    const correctNonce = genesisBlock.nonce === 100;
+    const correctNonce = genesisBlock.nonce === 0;
     const correctPreviousBlockHash = genesisBlock.previousBlockHash === "0";
     const correctHash = genesisBlock.hash === "0";
     const correctTransactions = genesisBlock.transactions.length === 0;
-    if (!correctHash || !correctNonce || !correctPreviousBlockHash || !correctTransactions) {
+    if (
+      !correctHash ||
+      !correctNonce ||
+      !correctPreviousBlockHash ||
+      !correctTransactions
+    ) {
       validChain = false;
     }
     // if the blockchain is valid, return true
@@ -127,7 +141,10 @@ class Blockchain {
     const addressTransactions = [];
     this.chain.forEach((block) => {
       block.transactions.forEach((transaction) => {
-        if (transaction.sender === address || transaction.recipient === address) {
+        if (
+          transaction.sender === address ||
+          transaction.recipient === address
+        ) {
           addressTransactions.push(transaction);
         }
       });
